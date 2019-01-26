@@ -1,11 +1,10 @@
 (* Assignment 0: a BigInt package*)
-open signature_a0
+  open Signature_a0
   module A0 : BigInt = struct
-  (* Arithmetic operations:  *)
-  (* Addition *)
+  (*converting an integer to a list*)
     type sign = Neg | NonNeg;;
     type bigint = sign * int list;;
-  (*converting an integer to a list*)
+    (*converting int to list*)
     let rec posIntToList c = if c = 0 then 
                             []
                        else 
@@ -17,13 +16,13 @@ open signature_a0
                     (NonNeg,posIntToList num);; 
   (* Function to present the result in the form of a string. *)
     let rec print_list l1 = match l1 with
-    | [] -> ()
-    | x::xs -> print_int x; print_list xs;;
+    | [] -> ""
+    | x::xs -> (string_of_int x)^(print_list xs);;
 
 
     let print_num num = match num with
     | (NonNeg,l1) -> print_list l1
-    | (Neg,l1) -> print_string "-";print_list l1;;                  
+    | (Neg,l1) -> ("-")^(print_list l1);;                  
   (*bit addition*)                
     let bitAddc a b c = if a+b+c>=10 then
                 let sum = a+b+c in 
@@ -45,15 +44,16 @@ open signature_a0
                   |   y::ys -> let (carry,sum) = (bitAddc x y c) in
                           sum::addRev xs ys carry 
                  );;
-  (*addition of two numbers with same sign*)        
+  (* addition of two numbers with same sign *)        
   let addPos l1 l2 = List.rev ( addRev (List.rev l1) (List.rev l2) 0 );; 
+  (* bit subtraction *)
   let bitSubb x y b = if x-y-b < 0 then
               let dif = (10+x) - y - b in
                 (1,dif)
               else 
                 (0,x-y-b);; 
-
-    let rec borrowFor l1 b = match l1 with
+  (* borrow forward *)
+  let rec borrowFor l1 b = match l1 with
                [] -> []
             | [x] -> if x-b > 0 then [x-b]
                  else []        
@@ -150,10 +150,10 @@ open signature_a0
     let rec divListHelper l1 l2 q = if (compList (List.rev l1) (List.rev l2)) = -1 then (q,l1)
                     else  divListHelper (subRev l1 l2 0) l2 (q+1)
                   ;;
-
+    (* This function makes l2 equal to l1 by appending zeros *)              
     let rec mkEqual l1 l2 = if (List.length l1) > (List.length l2) then mkEqual l1 (0::l2)
                 else l2;;   
-
+    (* Here both l1 and l2 are reversed lists *)            
     let rec divList l1 l2 q bitsShifted = match l2 with
                 | [] -> raise DivisionByZero 
                 | _ -> ( match l1 with
@@ -173,14 +173,17 @@ open signature_a0
                     );;
     let divPos l1 l2 = match l2 with
     | [] -> raise DivisionByZero
-    | _ -> let (q,r) = (divList (List.rev l1) (mkEqual l1 (List.rev l2)) [] ((List.length l1)-(List.length l2))) in
+    | _ -> if (compList l1 l2) = -1 then ([],l1)
+           else 
+            let (q,r) = (divList (List.rev l1) (mkEqual l1 (List.rev l2)) [] ((List.length l1)-(List.length l2))) in
                 (rmLeadingZero(List.rev q),rmLeadingZero (List.rev r));;  
                              
   (*In division I have considerred that remainder is always positive*)
   (*Quotient*)
   let div b1 b2 = match b1 with
   | (Neg,l1) -> ( match b2 with
-          | (Neg,l2) -> let (q,r) = (divPos l1 l2) in
+          | (Neg,l2) ->  
+                  let (q,r) = (divPos l1 l2) in
                   (match r with
                   | [] -> (NonNeg,q)
                   | _ -> (NonNeg,(addPos q [1]))
@@ -193,7 +196,10 @@ open signature_a0
           ) 
   | (NonNeg,l1) -> ( match b2 with
           | (Neg,l2) -> let (q,r) = (divPos l1 l2) in
-                  (Neg,q)
+                (match q with
+                  | [] -> (NonNeg,q)
+                  | _ -> (Neg,q)
+                )
           | (NonNeg,l2) -> let (q,r) = (divPos l1 l2) in
                   (NonNeg,q)
           ) ;; 
@@ -254,4 +260,4 @@ open signature_a0
   (* Less_or_equal.  *)
   let leq b1 b2 = if (gt b1 b2) = true then false 
             else true;;     
-
+end
