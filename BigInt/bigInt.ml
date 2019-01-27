@@ -150,7 +150,7 @@
 
   	let rec mkEqual l1 l2 = if (List.length l1) > (List.length l2) then mkEqual l1 (0::l2)
   							else l2;; 	
-
+                
   	let rec divList l1 l2 q bitsShifted = match l2 with
   							| [] -> raise DivisionByZero 
   							| _ -> ( match l1 with

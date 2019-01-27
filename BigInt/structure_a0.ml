@@ -178,21 +178,18 @@
             let (q,r) = (divList (List.rev l1) (mkEqual l1 (List.rev l2)) [] ((List.length l1)-(List.length l2))) in
                 (rmLeadingZero(List.rev q),rmLeadingZero (List.rev r));;  
                              
-  (*In division I have considerred that remainder is always positive*)
+  (*In division I have considerred that remainder has same sign as the divident*)
   (*Quotient*)
   let div b1 b2 = match b1 with
   | (Neg,l1) -> ( match b2 with
           | (Neg,l2) ->  
                   let (q,r) = (divPos l1 l2) in
-                  (match r with
-                  | [] -> (NonNeg,q)
-                  | _ -> (NonNeg,(addPos q [1]))
-                  )
+                    (NonNeg,q)
           | (NonNeg,l2) -> let (q,r) = (divPos l1 l2) in
-                  (match r with
-                  | [] -> (Neg,q)
-                  | _ -> (Neg,(addPos q [1]))
-                  )
+                    (match q with
+                    | [] -> (NonNeg,q)
+                    | _ -> (Neg,q)
+                    )
           ) 
   | (NonNeg,l1) -> ( match b2 with
           | (Neg,l2) -> let (q,r) = (divPos l1 l2) in
@@ -203,13 +200,13 @@
           | (NonNeg,l2) -> let (q,r) = (divPos l1 l2) in
                   (NonNeg,q)
           ) ;; 
-  (* Remainder (assuming remainder is always positive)*)
+  (* Remainder*)
     let rem b1 b2 = match b1 with
     | (Neg,l1) -> ( match b2 with
             | (_,l2) -> let (q,r) = (divPos l1 l2) in
                     (match r with
                     | [] -> (NonNeg,r)
-                    | _ -> (NonNeg,subPos l2 r))
+                    | _ -> (Neg,r))
                   
           )
     | (NonNeg,l1) -> (  match b2 with
