@@ -21,7 +21,8 @@
 
 
     let print_num num = match num with
-    | (NonNeg,l1) -> print_list l1
+    | (NonNeg,l1) -> if (List.length l1) >=1 then print_list l1
+                      else "0"
     | (Neg,l1) -> ("-")^(print_list l1);;                  
   (*bit addition*)                
     let bitAddc a b c = if a+b+c>=10 then
