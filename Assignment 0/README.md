@@ -1,5 +1,5 @@
 # Big Int package for Ocaml
-##Setup
+## Setup
 Keep signature.mli and structure.ml in the same folder. Run the following command from the terminal 
 ```
 ocamlc signature.mli
@@ -9,7 +9,7 @@ This will compile the signature file and then run the following commands in the 
 #use "structure_a0.ml";;
 open A0;;
 ```
-##Functions
+## Functions
 The Big Int package contains the following functions
 ## Arithmetic operators
 ### Addition.
