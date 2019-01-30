@@ -1,4 +1,15 @@
 # Big Int package for Ocaml
+##Setup
+Keep signature.mli and structure.ml in the same folder. Run the following command from the terminal 
+```
+ocamlc signature.mli
+```
+This will compile the signature file and then run the following commands in the top level to use the package
+```
+#use "structure_a0.ml";;
+open A0;;
+```
+##Functions
 The Big Int package contains the following functions
 ## Arithmetic operators
 ### Addition.
@@ -20,12 +31,14 @@ Function call:
 sub b1 b2;;
 ```
 ### Quotient:
+Division has been implemented keeping in mind the Ocaml division of standard integers. The quotient has a negative sign if dividend and divisor are of opposite signs.  
 Type: div: bigint -> bigint -> bigint
 Function call:
 ```
 div b1 b2;;
 ```
 ### Remainder.
+Division has been implemented keeping in mind the Ocaml division of standard integers. The remainder has the same as that of the divident.  
 Type: sub: bigint -> bigint -> bigint
 Function call:
 ```
@@ -75,7 +88,8 @@ Function call:
 leq b1 b2;;
 ```
 ## Functions to present the result in the form of a string. 
-### print_num:  
+### print_num:
+Printing a bigint  
 Type: print_num:bigint -> string
 Function call:
 ```
@@ -83,6 +97,7 @@ print_num b1;;
 ```
 ## Conversion functions from OCaml int to bigint.
 ### mk_big:
+It converts a standard int to bigint.  
 Type: mk_big: int -> bigint
 Function call:
 ```
