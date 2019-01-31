@@ -1,8 +1,4 @@
-#load "structure_a0.cmo"
-open Structure_a0.A0
-open Signature_a1 
-module A1 : CalculatorLanguage = struct
-	
+open A0	
 	(* abstract syntax  *)
 	type  exptree =  N of int
     | Plus of exptree * exptree
@@ -77,5 +73,3 @@ module A1 : CalculatorLanguage = struct
     | Rem(t1,t2) ->  (compile t1) @ (compile t2) @ [REM]
     | Nega(t1) ->  (compile t1) @ [UNARYMINUS]
     | Abs(t1) ->  (compile t1) @ [ABS]
-
-end

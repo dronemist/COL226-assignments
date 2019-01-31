@@ -2,8 +2,7 @@
 In this assignment, you will model the "abstract syntax" of a simple calculator language for integer expressions, and give it "semantic meaning" in terms of OCaml's built-in types, and in the second part, implement the calculator as a simple stack-based machine, for which we have opcodes into which we compile the abstract syntax of an expression.
 *)
 
-open Structure_a0.A0 (* Should be in same folder*)
-module type CalculatorLanguage = sig
+open A0 (* Should be in same folder*)
    (* abstract syntax  *)
   type  exptree =  N of int
     | Plus of exptree * exptree
@@ -25,7 +24,6 @@ module type CalculatorLanguage = sig
 
   (* The compile function is simply a postorder traversal of an abstract syntax tree of an expression. The compiler is to be defined as a recursive function *)
   val compile: exptree -> opcode list 
-end
 
 (* Instructions for submission:
 Same instructions as Assignment 0

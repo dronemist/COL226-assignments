@@ -1,6 +1,4 @@
 (* Assignment 0: a BigInt package*)
-  open Signature_a0
-  module A0 : BigInt = struct
   (*converting an integer to a list*)
     type sign = Neg | NonNeg;;
     type bigint = sign * int list;;
@@ -154,7 +152,8 @@
     (* This function makes l2 equal to l1 by appending zeros *)              
     let rec mkEqual l1 l2 = if (List.length l1) > (List.length l2) then mkEqual l1 (0::l2)
                 else l2;;   
-    (* Here both l1 and l2 are reversed lists *)            
+    (* Here both l1 and l2 are reversed list *)
+    (* Division by long division *)
     let rec divList l1 l2 q bitsShifted = match l2 with
                 | [] -> raise DivisionByZero 
                 | _ -> ( match l1 with
@@ -258,4 +257,3 @@
   (* Less_or_equal.  *)
   let leq b1 b2 = if (gt b1 b2) = true then false 
             else true;;     
-end
