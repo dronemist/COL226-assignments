@@ -8,25 +8,36 @@ This will create a _build directory and then the functions can be used from ocam
 
 ## Components
 **The abstract syntax** is characterised by the type
-```
-<span style="color:red">type</span> <span style="color:cyan">exptree</span> = <span style="color:green"> N </span>of int  
-|<span style="color:green"> Plus</span> of <span style="color:cyan">exptree *  exptree</span>  
-|<span style="color:green"> Minus</span> of <span style="color:cyan">exptree *  exptree</span>  
-|<span style="color:green"> Mult</span> of <span style="color:cyan">exptree *  exptree</span>  
-|<span style="color:green"> Div</span> of <span style="color:cyan">exptree *  exptree</span>  
-|<span style="color:green"> Rem</span> of <span style="color:cyan">exptree *  exptree</span>  
-|<span style="color:green"> Neg</span> of <span style="color:cyan"> exptree</span>  
-|<span style="color:green"> Abs</span> of <span style="color:cyan"> exptree</span>  
-;;
+```ocaml
+type  exptree =  N of int
+| Plus of exptree * exptree
+| Minus of exptree * exptree
+| Mult of exptree * exptree
+| Div of exptree * exptree
+| Rem of exptree * exptree
+| Nega of exptree (* Neg is for sign in BigInt. Nega is negative of expression  *)
+| Abs of exptree
 ```
 **The definitional interpreter** is defined as a function 
+```ocaml
+val eval : exptree -> int
 ```
-<span style="color:green"> eval </span> :<span style="color:cyan"> exptree -> int</span>  
+**The type of opcodes** of the stack machine is defined as:
+```ocaml
+type opcode = CONST of bigint | PLUS | TIMES | MINUS | DIV | REM | ABS | UNARYMINUS ;;
 ```
-**
-
-
-
+**The stack machine** is defined as a tail-recursive function
+```ocaml
+val stackmc: (bigint list) -> (opcode list) -> bigint
+```
+Here bigint is the bigint package implemented in assignment 0.  
+**Compile**
+The compile function is simply a postorder traversal of an abstract syntax tree of an expression
+The compiler is defined as a recursive function
+```ocaml
+val compile: exptree -> opcode list
+```
+Finally we conclude that for an exptree t, `eval t = stackmc l1 (compile t)` 
 
 
 
