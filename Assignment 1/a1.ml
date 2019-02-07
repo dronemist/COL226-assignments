@@ -24,36 +24,41 @@ open A0
     			 else (eval t1);;
 	(* exception to check if the stack is correctly formed *)    
     exception IllFormedStack;;
-
+    (* Tail recursive function to evaluate the opcode list using a stack.
+       I have assumed that opcList is complete ie it is correctly formed when opcode list is matched with an empty list. 
+       If opcode list is empty I return the value in the stack else if the stack is not completely empty I raise an exception.
+ 	 *)
+ 	 (* as the left element is pushed first, I have done bin(z2,z1) for all the binary operators *)
     let rec stackmc l1 opcList = match opcList with
-    | [] -> ( match l1 with
+    | [] -> ( match l1 with	
 	    	| [] -> mk_big 0
-		    | [x] -> x
-		    | _ -> raise IllFormedStack
+		    | x::xs -> x
 			)
     | x::xs -> ( match x with
 			    | CONST (y) -> stackmc (y::l1) (xs)
-			    | PLUS -> (	match l1 with
-			    			| z1::z2::zs -> stackmc ((add z1 z2)::zs) xs
+			    | PLUS -> (	(* The list should have atleast two elements if we match a binary operator *)
+			    			match l1 with
+			    			| z1::z2::zs -> stackmc ((add z2 z1)::zs) xs
 			    			| _ -> raise IllFormedStack
 			    		)	
 			    | MINUS ->  (	match l1 with
-			    			| z1::z2::zs -> stackmc ((sub z1 z2)::zs) xs
+			    			| z1::z2::zs -> stackmc ((sub z2 z1)::zs) xs
 			    			| _ -> raise IllFormedStack
 			    		)
 			    | TIMES ->  (	match l1 with
-			    			| z1::z2::zs -> stackmc ((mult z1 z2)::zs) xs
+			    			| z1::z2::zs -> stackmc ((mult z2 z1)::zs) xs
 			    			| _ -> raise IllFormedStack
 			    		)
 			    | DIV ->	(	match l1 with
-			    			| z1::z2::zs -> stackmc ((div z1 z2)::zs) xs
+			    			| z1::z2::zs -> stackmc ((div z2 z1)::zs) xs
 			    			| _ -> raise IllFormedStack
 			    		)
 			    | REM ->	(	match l1 with
-			    			| z1::z2::zs -> stackmc ((rem z1 z2)::zs) xs
+			    			| z1::z2::zs -> stackmc ((rem z2 z1)::zs) xs
 			    			| _ -> raise IllFormedStack
 			    		) 
-			    | UNARYMINUS ->	(	match l1 with
+			    | UNARYMINUS ->	( (* The list should have atleast an element if we match a unary operator *)	
+			    			match l1 with
 			    			| z1::zs -> stackmc ((minus z1)::zs) xs
 			    			| _ -> raise IllFormedStack
 			    		)
@@ -64,6 +69,7 @@ open A0
 			);;
 
     (* Postorder Traversal *)
+    (* Recursive function to find the postorder traversal of a tree *)
     let rec compile tree = match tree with
     | N(x) -> [CONST(mk_big x)]
     | Plus(t1,t2) ->  (compile t1) @ (compile t2) @ [PLUS]

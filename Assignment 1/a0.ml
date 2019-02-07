@@ -12,12 +12,12 @@
                     (Neg,posIntToList (-num))
                    else 
                     (NonNeg,posIntToList num);; 
-  (* Function to present the result in the form of a string. *)
+   (* Printing a list *)
     let rec print_list l1 = match l1 with
     | [] -> ""
     | x::xs -> (string_of_int x)^(print_list xs);;
 
-
+    (* Function to present the result in the form of a string. *)
     let print_num num = match num with
     | (NonNeg,l1) -> if (List.length l1) >=1 then print_list l1
                       else "0"
@@ -35,7 +35,8 @@
              |x::xs -> let (carry,sum) = (bitAddc x c 0) in
                     if carry>0 then (sum :: (carryFor xs carry))
                     else  (sum::xs);;
-  (*This add function takes number with least significant as the first digit and returns a list with least significant as the first digit*)
+  (*This add function takes number with least significant as the first digit and 
+  returns a list with least significant as the first digit*)
     let rec addRev l1 l2 c = match l1 with 
             [] -> carryFor l2 c
           |   x::xs -> (  match l2 with 
@@ -71,10 +72,11 @@
     let rec rmLeadingZero l1 = match l1 with
         | [] -> []
         | x::xs -> if x = 0 then rmLeadingZero xs
-                    else l1;;              
+                    else l1;;
+    (* Subtraction of two positive lists assuming l1 > l2 *)
     let subPos l1 l2 = rmLeadingZero (List.rev ( subRev (List.rev l1) (List.rev l2) 0 ));;
 
-  (*This function return 1 if l1 > l2, 0 if l1 = l2, -1 if l1 < l2*)
+  (*This function returns 1 if l1 > l2, 0 if l1 = l2, -1 if l1 < l2*)
     let rec compList l1 l2 = match l1 with
             [] ->( match l2 with
                       [] -> 0
@@ -127,7 +129,7 @@
             | [] -> []
             | _ -> 0::l1;;
 
-    (*multiply two reversed lists*)
+  (*multiply two reversed lists*)
   let rec multList res l1 l2 = match l1 with
               | [] -> res
               | x::xs -> multList (addRev res (multSingleDigit l2 x 0) 0) xs (listShiftRight l2)
@@ -137,14 +139,16 @@
   let mult b1 b2 = match b1 with
           | (NonNeg,l1) -> ( match b2 with
                     | (NonNeg,l2) -> (NonNeg,(multPos l1 l2))
-                    | (Neg,l2) -> (Neg,(multPos l1 l2))
+                    | (Neg,l2) -> if ( l1 = [] || l2 = []) then (NonNeg,[])
+                                  else(Neg,(multPos l1 l2))
                   )
           | (Neg,l1) -> ( match b2 with
-                  | (NonNeg,l2) -> (Neg,(multPos l1 l2))
+                  | (NonNeg,l2) -> if ( l1 = [] || l2 = []) then (NonNeg,[])
+                                   else(Neg,(multPos l1 l2))
                   | (Neg,l2) -> (NonNeg,(multPos l1 l2))
                 );;
   (* Quotient *)
-  (*div list helper finds a single digit of the quotient*)
+    (*div list helper finds a single digit of the quotient*)
     exception DivisionByZero;;
     let rec divListHelper l1 l2 q = if (compList (List.rev l1) (List.rev l2)) = -1 then (q,l1)
                     else  divListHelper (subRev l1 l2 0) l2 (q+1)
@@ -171,6 +175,7 @@
                           (quotient::q,rem)
                             
                     );;
+    (* Division of two positive lists l1 and l2 *)
     let divPos l1 l2 = match l2 with
     | [] -> raise DivisionByZero
     | _ -> if (compList l1 l2) = -1 then ([],l1)
@@ -217,7 +222,10 @@
   (* Unary negation *)
   let minus b1 = match b1 with
   | (Neg,l1) -> (NonNeg,l1)
-  | (NonNeg,l1) -> (Neg,l1);;
+  | (NonNeg,l1) -> (match l1 with
+                    | [] -> (NonNeg,l1)
+                    | _ -> (Neg,l1) 
+                  );;
 
   (* Absolute value *)
   let abs b1 = match b1 with
