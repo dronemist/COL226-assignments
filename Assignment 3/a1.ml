@@ -2,6 +2,7 @@
 open A0
 exception NtupleNotPossible;;
 exception IthProjNotPossible;;
+exception InvalidProjection;;
 exception Not_implemented;;
 exception BadStack;;
 type  exptree =  Done (* End of input *)
@@ -84,8 +85,11 @@ let rec eval t = match t with
     | Project((i,x),t1) -> if i > x then raise IthProjNotPossible
                         else 
                         (match t1 with
-                        | Tuple(a,list) -> if i == 1 then (eval (List.hd list))
-                                         else (eval(Project((i-1,x-1),Tuple(a-1,(List.tl list))))) 
+                        | Tuple(a,list) -> if i != x then raise InvalidProjection
+                                           else 
+                                          (  if i == 1 then (eval (List.hd list))
+                                            else (eval(Project((i-1,x-1),Tuple(a-1,(List.tl list))))) 
+                                          )
                         | _ -> raise IthProjNotPossible
                         )                      
     | Add(t1,t2) -> Num(add (bigint_of_Num(eval t1)) (bigint_of_Num(eval t2)))
