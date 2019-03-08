@@ -1,6 +1,7 @@
 (* Dummy implementation of A1 *)
 open A0
 exception NtupleNotPossible;;
+exception TypeMismatch;;
 exception IthProjNotPossible;;
 exception InvalidProjection;;
 exception Not_implemented;;
@@ -49,12 +50,12 @@ type answer = Num of bigint | Bool of bool | Tup of int * (answer list)
 (* This function extracts the bigint from answer type *)
 let bigint_of_Num t = match t with 
 | Num(x) -> x
-| _ -> (mk_big 0);;
+| _ -> raise TypeMismatch;;
 
 (* This function extracts bool from answer type *)
 let bool_of_Bool b = match b with
 | Bool(x) -> x
-| _ -> true;;
+| _ -> raise TypeMismatch;;
 (* Map from string variable names to their values. New values can be added *)
 module VarTable = Map.Make(String)
 
@@ -78,6 +79,7 @@ let rec eval t = match t with
                      else 
                       (
                         match l1 with 
+                        | [] -> raise NtupleNotPossible
                         | [y] -> Tup(x,[eval y])
                         | y::ys -> let Tup(a,list) = eval(Tuple(x-1,ys)) in
                                       Tup(x,(eval y)::list)

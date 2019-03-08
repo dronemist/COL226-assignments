@@ -19,8 +19,6 @@ let rec print_answer tr = match tr with
   Num a -> print_num a
   | Bool a -> string_of_bool a
 ;;
-
-
 (* Parser accepts the expression as string and binding as hash map with variable to values (integer, boolean, tuple) *)
 let parser s binding =
   let result = A3.main A2.read (Lexing.from_string s) in
@@ -32,4 +30,4 @@ let parser s binding =
 let binding = Hashtbl.create 123456;;
 Hashtbl.add binding (Var "x") (N 10);;
 
-let _ = (parser "5;" binding);;
+let (a,b,c) = (parser "5" binding);;

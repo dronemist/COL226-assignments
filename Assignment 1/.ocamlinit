@@ -3,3 +3,4 @@
   #load "a1.cmo";;
   open A0;;        
   open A1;;
+let tree = Project((2,3)Tuple(3,[Add(N 1,N 3);Sub(N 1,N 3);Conjunction(B true,B true)]));;
