@@ -1,7 +1,7 @@
 open A0
 
 (* abstract syntax *)
-type  exptree =  Done (* End of input *)
+type  exptree =
   | Var of string (* variables starting with a Capital letter, represented as alphanumeric strings with underscores (_) and apostrophes (') *)
   | N of int      (* Integer constant *)
   | B of bool     (* Boolean constant *)
@@ -35,7 +35,7 @@ type  exptree =  Done (* End of input *)
   | Project of (int*int) * exptree   (* Proj((i,n), e)  0 < i <= n *)
 
 (* opcodes of the stack machine (in the same sequence as above) *)
-type opcode = NCONST of bigint | BCONST of bool | ABS | UNARYMINUS | NOT
+type opcode = VAR of string | NCONST of bigint | BCONST of bool | ABS | UNARYMINUS | NOT
   | PLUS | MINUS | MULT | DIV | REM | CONJ | DISJ | EQS | GTE | LTE | GT | LT
   | PAREN | IFTE | TUPLE of int | PROJ of int*int
 
@@ -43,7 +43,7 @@ type opcode = NCONST of bigint | BCONST of bool | ABS | UNARYMINUS | NOT
 type answer = Num of bigint | Bool of bool | Tup of int * (answer list)
 
 (* the definitional interpreter *)
-val eval : exptree -> answer
-val stackmc: (answer list) -> (opcode list) -> answer
+val eval : exptree -> (string -> answer) -> answer
+val stackmc: (answer list) -> (string -> answer) -> (opcode list) -> answer
 
 val compile: exptree -> opcode list
