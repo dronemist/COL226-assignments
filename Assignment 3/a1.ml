@@ -44,8 +44,18 @@ type opcode = VAR of string | NCONST of bigint | BCONST of bool | ABS | UNARYMIN
   | PLUS | MINUS | MULT | DIV | REM | CONJ | DISJ | EQS | GTE | LTE | GT | LT
   | PAREN | IFTE | TUPLE of int | PROJ of int*int
 
+type value = NumVal of int | BoolVal of bool | TupVal of int * (value list)
+
 (* The language should contain the following types of expressions:  integers and booleans *)
 type answer = Num of bigint | Bool of bool | Tup of int * (answer list)
+
+let int_of_NumVal t = match t with
+| NumVal(x) -> x
+| _ -> raise TypeMismatch;; 
+
+let bool_of_BoolVal b = match b with
+| BoolVal(x) -> x
+| _ -> raise TypeMismatch;;
 
 (* This function extracts the bigint from answer type *)
 let bigint_of_Num t = match t with 
@@ -56,49 +66,49 @@ let bigint_of_Num t = match t with
 let bool_of_Bool b = match b with
 | Bool(x) -> x
 | _ -> raise TypeMismatch;;
-(* Map from string variable names to their values. New values can be added *)
-module VarTable = Map.Make(String)
 
 (* evaluating the tree where is the hashtable containing values *)
 let rec eval t rho = match t with
-    | N(x) -> (Num (mk_big x))
-    | B(x) -> (Bool x)
+    | N(x) -> (NumVal x)
+    | B(x) -> (BoolVal x)
     | Var(x) -> (rho x)
-    | Conjunction(t1,t2) -> Bool(bool_of_Bool(eval t1 rho) && bool_of_Bool(eval t2 rho))
-    | Disjunction(t1,t2) -> Bool(bool_of_Bool(eval t1 rho) || bool_of_Bool(eval t2 rho))
-    | Not(t1) ->  Bool(not (bool_of_Bool(eval t1 rho)))
-    | Equals(t1,t2) -> Bool(eq (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | GreaterTE(t1,t2) -> Bool(geq (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | LessTE(t1,t2) -> Bool(leq (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | GreaterT(t1,t2) -> Bool(gt (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | LessT(t1,t2) -> Bool(lt (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
+    | Conjunction(t1,t2) -> BoolVal(bool_of_BoolVal(eval t1 rho) && bool_of_BoolVal(eval t2 rho))
+    | Disjunction(t1,t2) -> BoolVal(bool_of_BoolVal(eval t1 rho) || bool_of_BoolVal(eval t2 rho))
+    | Not(t1) ->  BoolVal(not (bool_of_BoolVal(eval t1 rho)))
+    | Equals(t1,t2) -> BoolVal( (int_of_NumVal(eval t1 rho)) > (int_of_NumVal(eval t2 rho)))
+    | GreaterTE(t1,t2) -> BoolVal((int_of_NumVal(eval t1 rho)) >= (int_of_NumVal(eval t2 rho)))
+    | LessTE(t1,t2) -> BoolVal((int_of_NumVal(eval t1 rho)) <= (int_of_NumVal(eval t2 rho)))
+    | GreaterT(t1,t2) -> BoolVal((int_of_NumVal(eval t1 rho)) > (int_of_NumVal(eval t2 rho)))
+    | LessT(t1,t2) -> BoolVal((int_of_NumVal(eval t1 rho)) < (int_of_NumVal(eval t2 rho)))
     | InParen(t1) -> (eval t1 rho)
-    | IfThenElse(t1,t2,t3) -> if bool_of_Bool(eval t1 rho) then (eval t2 rho)
+    | IfThenElse(t1,t2,t3) -> if bool_of_BoolVal(eval t1 rho) then (eval t2 rho)
                               else (eval t3 rho)
     | Tuple(x,l1) -> if x != (List.length l1) then raise NtupleNotPossible 
                      else 
                       (
                         match l1 with 
-                        | [] -> Tup(0,[])
-                        | [y] -> Tup(x,[eval y rho])
-                        | y::ys -> let Tup(a,list) = (eval (Tuple(x-1,ys)) rho) in
-                                      Tup(x,(eval y rho)::list)
+                        | [] -> TupVal(0,[])
+                        | [y] -> TupVal(x,[eval y rho])
+                        | y::ys -> let TupVal(a,list) = (eval (Tuple(x-1,ys)) rho) in
+                                      TupVal(x,(eval y rho)::list)
                       )
     | Project((i,x),t1) -> if i > x then raise IthProjNotPossible
                         else 
                         (match (eval t1 rho) with
-                        | Tup(a,list) -> if a != x then raise InvalidProjection
+                        | TupVal(a,list) -> if a != x then raise InvalidProjection
                                            else 
                                            (List.nth list (i-1)) 
                         | _ -> raise IthProjNotPossible
                         )                      
-    | Add(t1,t2) -> Num(add (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | Sub(t1,t2) -> Num(sub (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | Mult(t1,t2) -> Num(mult (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | Div(t1,t2) -> Num(div (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | Rem(t1,t2) -> Num(rem (bigint_of_Num(eval t1 rho)) (bigint_of_Num(eval t2 rho)))
-    | Negative(t1) -> Num(minus (bigint_of_Num(eval t1 rho)))
-    | Abs(t1) -> Num(abs (bigint_of_Num(eval t1 rho)))
+    | Add(t1,t2) -> NumVal((int_of_NumVal(eval t1 rho)) + (int_of_NumVal(eval t2 rho)))
+    | Sub(t1,t2) -> NumVal((int_of_NumVal(eval t1 rho)) - (int_of_NumVal(eval t2 rho)))
+    | Mult(t1,t2) -> NumVal( (int_of_NumVal(eval t1 rho)) * (int_of_NumVal(eval t2 rho)))
+    | Div(t1,t2) -> NumVal( (int_of_NumVal(eval t1 rho)) / (int_of_NumVal(eval t2 rho)))
+    | Rem(t1,t2) -> NumVal( (int_of_NumVal(eval t1 rho)) mod (int_of_NumVal(eval t2 rho)))
+    | Negative(t1) -> NumVal( -(int_of_NumVal(eval t1 rho)))
+    | Abs(t1) -> NumVal( let q = (int_of_NumVal(eval t1 rho)) in
+                          if(q >= 0) then q else -q
+                        )
 ;;
 (* function to take first n elements of a list *)
 let rec firstN n l1 l2 = if n == 1 then (l2 @ [List.hd l1],List.tl l1)
