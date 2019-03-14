@@ -68,7 +68,7 @@ unary_expression:
     | TILDA unary_expression {Negative($2)}
     | expression         {$1}
 ;
-
+/* I have kept the precedence of proj tuple and if then else as the same as I feel this is how it is supposed to be */
 expression:
     | IF or_expression THEN or_expression ELSE or_expression FI     {IfThenElse($2,$4,$6)} 
     | PROJ LP INT COMMA INT RP expression      {Project(($3,$5),$7)}
@@ -78,7 +78,7 @@ expression:
 ;
 
 tuple:
-    | or_expression COMMA tuple {let Tuple(x,y) = $3 in Tuple(x+1,$1::y)} 
+    | tuple COMMA or_expression {let Tuple(x,y) = $1 in Tuple(x+1,y@[$3])} 
     | or_expression COMMA or_expression   {Tuple(2,[$1;$3])}
 ;
 
