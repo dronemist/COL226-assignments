@@ -27,7 +27,7 @@ rule read = parse
 | "-"  {(MINUS)}
 | "*"  {(TIMES)}
 | "div" {(DIV)}
-| "rem"  {(REM)}
+| "mod"  {(REM)}
 | '(' {(LP)}
 | ')' {(RP)}
 | 'T' {(BOOL(true))}

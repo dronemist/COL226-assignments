@@ -76,7 +76,7 @@ expression:
     | LP tuple RP { $2 } 
     | parenthesis { $1 }
 ;
-
+/* To generate the expression list */
 tuple:
     | tuple COMMA or_expression {let Tuple(x,y) = $1 in Tuple(x+1,y@[$3])} 
     | or_expression COMMA or_expression   {Tuple(2,[$1;$3])}
