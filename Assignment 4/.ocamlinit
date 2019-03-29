@@ -52,3 +52,8 @@ let rho s = match s with
   |  "Z" -> TupVal (3, [NumVal 5; BoolVal true; NumVal 1])
   | _ -> raise Not_implemented
 ;;
+(* Type assumptions as a list of tuples of the form (variable name, type) *)
+let g = [("X", Tint); ("Y", Tbool); ("Z", Ttuple [Tint ; Tbool ; Tint]); ("W", Tfunc (Tint, Tbool))];;
+let d = (def_parser "def U = X ; def V = Y" rho);;
+let g_dash = [("U", Tint); ("V", Tbool)];;
+let gp = [("X", Tint); ("Y", Tbool); ("Z", Tfunc(Tint, Tbool)); ("W", Tfunc(Tbool, Tint))];;

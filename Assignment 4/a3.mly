@@ -86,12 +86,12 @@ tuple:
 
 definition:
 | LET definition_expression IN or_expression END {Let($2,$4)}
-| function { $1 }
+| function_call { $1 }
 ;
 
-function:
+function_call:
 | BACKSLASH ID DOT parenthesis {(FunctionAbstraction($2,$4))}
-| function LP or_expression RP {FunctionCall($1,$3)} 
+| function_call LP or_expression RP {FunctionCall($1,$3)} 
 | parenthesis {$1}
 ;
 
@@ -122,7 +122,7 @@ para_definition:
                                                 | _ -> Parallel([$1;$3])}
 ;
 parallel_definition:
-| simple_expression {Parallel($1)}
+| simple_expression {Parallel([$1])}
 | seq_definition {$1}
 | parallel_definition PARALLEL simple_expression {let Parallel(l1) = $1 in Parallel(l1@[$3])}
 ;
@@ -133,7 +133,7 @@ seq_definition:
                                                 | _ -> Sequence([$1;$3])}
 ;
 sequence_definition:
-| simple_expression {Sequence($1)}
+| simple_expression {Sequence([$1])}
 | para_definition {$1}
 | sequence_definition SEMICOLON simple_expression {let Sequence(l1) = $1 in Sequence(l1@[$3])}
 ;
