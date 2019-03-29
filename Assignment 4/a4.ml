@@ -82,6 +82,10 @@ and getType g e = match e with
                         | _ -> raise Type_mismatch)
   | Let (d,t1) -> let generated_table = (genTable d g) in
                   (getType (augment g generated_table) t1)
+  | FunctionAbstraction(x,e1) -> (try let ty = (search x g) in
+                                  Tfunc(ty,(getType (augment g [(x,ty)]) e1)) 
+                                  with Not_found -> raise Type_mismatch
+  )                
   | FunctionCall (e1,e2) ->( match (getType g e1) with
                             | Tfunc(t1,t2) -> if (getType g e2) = t1 then t2
                                               else raise Type_mismatch   
