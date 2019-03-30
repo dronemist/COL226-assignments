@@ -68,12 +68,20 @@ mult_expression:
 unary_expression:
     | ABS unary_expression   {Abs($2)}
     | TILDA unary_expression {Negative($2)}
-    | expression         {$1}
+    | proj_expression         {$1}
 ;
-/* I have kept the precedence of proj tuple and if then else as the same as I feel this is how it is supposed to be */
+
+proj_expression:
+    | function_call_one {$1}
+    | PROJ LP INT COMMA INT RP proj_expression      {Project(($3,$5),$7)}
+;
+
+function_call_one:
+    | expression {$1}
+    | function_call_one LP or_expression RP {FunctionCall($1,$3)} 
+;
 expression:
     | IF or_expression THEN or_expression ELSE or_expression FI     {IfThenElse($2,$4,$6)} 
-    | PROJ LP INT COMMA INT RP expression      {Project(($3,$5),$7)}
     | LP RP {Tuple(0,[])}
     | LP tuple RP { $2 } 
     | definition { $1 }
@@ -91,7 +99,6 @@ definition:
 
 function_call:
 | BACKSLASH ID DOT parenthesis {(FunctionAbstraction($2,$4))}
-| function_call LP or_expression RP {FunctionCall($1,$3)} 
 | parenthesis {$1}
 ;
 

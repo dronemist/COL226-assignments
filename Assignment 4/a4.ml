@@ -2,6 +2,7 @@ open A1
 exception Not_implemented
 exception Type_mismatch;;
 exception Not_found;;
+exception Intersection_not_zero;;
 (* Searching in a table *)
 let rec search x l = match l with
 | [] -> raise Not_found
@@ -9,23 +10,38 @@ let rec search x l = match l with
             if x = a then b
             else (search x ys)  
 ;;
-
+(* if x is a member of list l *)
+let ismem x l = let (a,b) = x in
+                (try let y = (search a l) in true
+                with Not_found -> false)
+;;
 (* Augments two tables t1 t2*)
-let augment t1 t2 = t2 @ t1;;
-
+let rec augment t1 t2 = match t1 with
+|[] -> t2 
+|hd::tl -> if (ismem hd t2) = false then (augment tl (t2@[hd]))
+            else (augment tl t2) ;;
+(* checking if intersection of two tables is phi *)
+let rec checkInter t1 t2 = match t1 with 
+| [] -> true
+| x::xs -> if (ismem x t2) = true then false
+           else (checkInter xs t2)
+;; 
 (* create exptype list from exptree list *)
 let rec getTypeList l1 g= match l1 with
   [] -> []
 | x::xs -> (getType g x)::(getTypeList xs g)  
+
 and genTable d1 g = match d1 with
 | Simple(x,t1) -> [(x,(getType g t1))]
 | Sequence (d_list) ->( match d_list with 
                         | [] -> []
-                        | d::ds -> (genTable (Sequence(ds)) (augment g (genTable d g))) @ (genTable d g)
+                        | d::ds -> let table = (genTable d g) in (augment table (genTable (Sequence(ds)) (augment g table)))
 )
 | Parallel (d_list) -> ( match d_list with 
                         | [] -> []
-                        | d::ds -> (genTable (Parallel(ds)) (g)) @ (genTable d g)
+                        | d::ds -> let table = (genTable d g) and table2 = (genTable (Parallel(ds)) g)  in 
+                                   (if (checkInter table table2) then  (augment table table2)
+                                  else raise Intersection_not_zero)
 )
 | Local(d1,d2) -> (genTable d2 (augment g (genTable d1 g)))
 and getType g e = match e with
