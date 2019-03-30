@@ -68,7 +68,12 @@ mult_expression:
 unary_expression:
     | ABS unary_expression   {Abs($2)}
     | TILDA unary_expression {Negative($2)}
-    | proj_expression         {$1}
+    | if_then_else        {$1}
+;
+
+if_then_else:
+    | IF or_expression THEN or_expression ELSE or_expression FI     {IfThenElse($2,$4,$6)}
+    | proj_expression {$1}
 ;
 
 proj_expression:
@@ -77,29 +82,25 @@ proj_expression:
 ;
 
 function_call_one:
-    | expression {$1}
-    | function_call_one LP or_expression RP {FunctionCall($1,$3)} 
+    | definition {$1}
+    | function_call_one LP or_expression RP {FunctionCall($1,$3)}
+    | BACKSLASH ID DOT definition {(FunctionAbstraction($2,$4))} 
 ;
+
+definition:
+| LET definition_expression IN or_expression END {Let($2,$4)}
+| expression { $1 }
+;
+
 expression:
-    | IF or_expression THEN or_expression ELSE or_expression FI     {IfThenElse($2,$4,$6)} 
     | LP RP {Tuple(0,[])}
     | LP tuple RP { $2 } 
-    | definition { $1 }
+    | parenthesis { $1 }
 ;
 /* To generate the expression list */
 tuple:
     | tuple COMMA or_expression {let Tuple(x,y) = $1 in Tuple(x+1,y@[$3])} 
     | or_expression COMMA or_expression   {Tuple(2,[$1;$3])}
-;
-
-definition:
-| LET definition_expression IN or_expression END {Let($2,$4)}
-| function_call { $1 }
-;
-
-function_call:
-| BACKSLASH ID DOT parenthesis {(FunctionAbstraction($2,$4))}
-| parenthesis {$1}
 ;
 
 parenthesis:
