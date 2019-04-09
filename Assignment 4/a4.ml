@@ -3,6 +3,16 @@ exception Not_implemented
 exception Type_mismatch;;
 exception Not_found;;
 exception Intersection_not_zero;;
+(* function to check if an element x is present in list l1 *)
+let rec isPresent x l1 = match l1 with
+|[] -> false
+|hd::tl -> if (x = hd) then true
+            else (isPresent x tl);;
+(* function to find if l1 is a subset of l2 *)
+let rec isSubset l1 l2 = match l1 with 
+|[] -> true
+|hd::tl -> if(isPresent hd l2) then (isSubset tl l2)
+            else false;;
 (* Searching in a table *)
 let rec search x l = match l with
 | [] -> raise Not_found
@@ -33,6 +43,8 @@ let rec getTypeList l1 g= match l1 with
 
 and genTable d1 g = match d1 with
 | Simple(x,t1) -> [(x,(getType g t1))]
+| SimpleType(x,t,e) -> if ((getType g e) = t) then [(x,t)]
+                       else raise Type_mismatch
 | Sequence (d_list) ->( match d_list with 
                         | [] -> []
                         | d::ds -> let table = (genTable d g) in (augment table (genTable (Sequence(ds)) (augment g table)))
@@ -94,29 +106,21 @@ and getType g e = match e with
                   else Ttuple(getTypeList l1 g)
   (* projecting the i-th component of an expression (which evaluates to an n-tuple, and 1 <= i <= n) *)
   | Project((x,y),t1) -> (match (getType g t1) with 
-                        | Ttuple(l1) -> (List.nth l1 x)
+                        | Ttuple(l1) -> (List.nth l1 (x-1))
                         | _ -> raise Type_mismatch)
   | Let (d,t1) -> let generated_table = (genTable d g) in
                   (getType (augment g generated_table) t1)
-  | FunctionAbstraction(x,e1) -> (try let ty = (search x g) in
-                                  Tfunc(ty,(getType (augment g [(x,ty)]) e1)) 
-                                  with Not_found -> raise Type_mismatch
-  )                
+  | FunctionAbstraction(x,t,e1) -> Tfunc(t,(getType (augment g [(x,t)]) e1)) 
   | FunctionCall (e1,e2) ->( match (getType g e1) with
                             | Tfunc(t1,t2) -> if (getType g e2) = t1 then t2
                                               else raise Type_mismatch   
                             | _ -> raise Type_mismatch  
   )
-and hastype g e t = match e with
-| FunctionAbstraction (x,e1) ->(
-                                match t with
-                                |Tfunc(t1,t2) -> (hastype (augment g ([x,t1])) e1 t2)
-                                |_ -> false
-) 
-| _ -> ( try (getType g e) = t
+and hastype g e t = ( try (getType g e) = t
          with Type_mismatch -> false 
 )
 ;;
 (* yields : ((string * exptree) list) -> definition -> ((string * exptree) list) -> bool *)
-let rec yields g d g_dash = try ((List.rev(genTable d g)) = g_dash) 
+let rec yields g d g_dash = try (
+                            let l1 = (genTable d g) in (isSubset g_dash l1)) 
                             with Type_mismatch -> false  ;;  

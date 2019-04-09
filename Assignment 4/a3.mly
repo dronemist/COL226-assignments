@@ -14,10 +14,11 @@
 %token <bool> BOOL
 %token <string> ID
 %token ABS TILDA NOT PLUS MINUS TIMES DIV REM CONJ DISJ EQ GT LT LP RP IF THEN ELSE FI COMMA PROJ
-LET IN END BACKSLASH DOT DEF SEMICOLON PARALLEL LOCAL EOF
-%start def_parser exp_parser
+LET IN END BACKSLASH DOT DEF SEMICOLON COLON ARROW TINT TUNIT TBOOL PARALLEL LOCAL EOF
+%start def_parser exp_parser type_parser
 %type <A1.definition> def_parser /* Returns definitions */
 %type <A1.exptree> exp_parser /* Returns expression */
+%type <A1.exptype> type_parser /* Returns type */
 %%
 /*
 DESIGN a grammar for a simple expression language, taking care to enforce precedence rules (e.g., BODMAS)
@@ -73,18 +74,14 @@ unary_expression:
 
 if_then_else:
     | IF or_expression THEN or_expression ELSE or_expression FI     {IfThenElse($2,$4,$6)}
-    | proj_expression {$1}
-;
-
-proj_expression:
+    | PROJ LP INT COMMA INT RP if_then_else      {Project(($3,$5),$7)}
     | function_call_one {$1}
-    | PROJ LP INT COMMA INT RP proj_expression      {Project(($3,$5),$7)}
 ;
 
 function_call_one:
     | definition {$1}
     | function_call_one LP or_expression RP {FunctionCall($1,$3)}
-    | BACKSLASH ID DOT definition {(FunctionAbstraction($2,$4))} 
+    | BACKSLASH ID COLON type_parser DOT definition {(FunctionAbstraction($2,$4,$6))} 
 ;
 
 definition:
@@ -149,4 +146,29 @@ sequence_definition:
 simple_expression:
 |LOCAL definition_expression IN definition_expression END {Local($2,$4)}
 |DEF ID EQ or_expression {Simple($2,$4)}
+|DEF ID COLON type_parser EQ or_expression {SimpleType($2,$4,$6)}
+;
+
+type_parser:
+| function_type    {$1}
+;
+
+function_type:
+| function_type ARROW other_types {Tfunc($1,$3)}
+| other_types {$1}
+;
+other_types:
+| LP type_list RP {$2}
+| simple_type {$1}
+;
+
+type_list:
+| type_list TIMES type_parser {let Ttuple(l1) = $1 in Ttuple(l1@[$3])}
+| type_parser {Ttuple([$1])}
+;
+
+simple_type:
+TINT {Tint}
+|TBOOL {Tbool}
+|TUNIT  {Tunit}
 ;

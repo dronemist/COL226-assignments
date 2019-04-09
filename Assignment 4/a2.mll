@@ -11,11 +11,12 @@ let digit = ['0'-'9']
 let digit_ = ['1'-'9']
 (* regex for integer with no leading zeros *)
 (* let integer = ['+' '-']?('0'|((digit_)digit *)
-(* regex for identifier starting with a lower case letter*)
+(* regex for identifier starting with a upper case letter*)
 let identifiers = (letterUpper)(letter|digit)*
 (* Regex for whitespace, newline is also considerred in whitespace *)
 let whitespace = [' ' '\t' '\n']+
-
+(* Regex for types *)
+let type = 'T'
 rule read = parse
 	eof {(EOF)}
 | digit+ as i {(INT(int_of_string i))}
@@ -49,6 +50,11 @@ rule read = parse
 | "." {(DOT)}
 | "def" {(DEF)}
 | ";" {(SEMICOLON)}
+| ":"	{(COLON)}
+| "Tint" {TINT}
+| "Tbool"	{TBOOL}
+| "Tunit"	{TUNIT}
+| "->" {ARROW}
 | "||" {(PARALLEL)}
 | "local" {(LOCAL)}
 | identifiers as i {(ID(i))}

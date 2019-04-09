@@ -44,6 +44,7 @@ let binding rho s = toAnswer (rho s);;
 (* Both use the same lexer in A1 but different parser in A3 *)
 let exp_parser s rho = A3.exp_parser A2.read (Lexing.from_string s) ;;
 let def_parser s rho = A3.def_parser A2.read (Lexing.from_string s) ;;
+let type_parser s rho = A3.type_parser A2.read (Lexing.from_string s) ;;
 
 
 (* Input is given as string and output is a value *)
@@ -53,13 +54,10 @@ let rho s = match s with
   |  "Z" -> TupVal (3, [NumVal 5; BoolVal true; NumVal 1])
   | _ -> raise Not_implemented
 ;;
-(* Sample test case *)
-let e = (exp_parser "\\X.Y" rho);;
-let t = Tfunc (Tint, Tbool);;
 (* Type assumptions as a list of tuples of the form (variable name, type) *)
 let g = [("X", Tint); ("Y", Tbool); ("Z", Ttuple [Tint ; Tbool ; Tint]); ("W", Tfunc (Tint, Tbool))];;
 let d = (def_parser "def U = X ; def V = Y" rho);;
 let g_dash = [("U", Tint); ("V", Tbool)];;
 let gp = [("X", Tint); ("Y", Tbool); ("Z", Tfunc(Tint, Tbool)); ("W", Tfunc(Tbool, Tint))];;
-(hastype g e t);;
-yields g d g_dash;;
+let g_test = [("Y", Tbool)];;
+  
