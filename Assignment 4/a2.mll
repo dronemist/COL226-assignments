@@ -15,8 +15,6 @@ let digit_ = ['1'-'9']
 let identifiers = (letterUpper)(letter|digit)*
 (* Regex for whitespace, newline is also considerred in whitespace *)
 let whitespace = [' ' '\t' '\n']+
-(* Regex for types *)
-let type = 'T'
 rule read = parse
 	eof {(EOF)}
 | digit+ as i {(INT(int_of_string i))}
