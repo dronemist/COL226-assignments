@@ -152,23 +152,21 @@ simple_expression:
 type_parser:
 | function_type    {$1}
 ;
-
 function_type:
-| function_type ARROW other_types {Tfunc($1,$3)}
-| other_types {$1}
+| tuple_type ARROW function_type  {Tfunc($1,$3)}
+| tuple_type {$1}
 ;
-other_types:
-| LP type_list RP {$2}
+tuple_type:
+| paren TIMES tuple_type  {match $3 with Ttuple(l1) ->  Ttuple($1::l1)
+                            | _ -> Ttuple[$1;$3]}
+| paren {$1}
+;
+paren:
+|LP type_parser RP {$2}
 | simple_type {$1}
 ;
-
-type_list:
-| type_list TIMES type_parser {let Ttuple(l1) = $1 in Ttuple(l1@[$3])}
-| type_parser {Ttuple([$1])}
-;
-
 simple_type:
-TINT {Tint}
+|TINT {Tint}
 |TBOOL {Tbool}
 |TUNIT  {Tunit}
 ;
