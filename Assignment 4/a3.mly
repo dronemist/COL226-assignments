@@ -155,7 +155,7 @@ type_parser:
 ;
 
 function_type:
-| function_type ARROW other_types {Tfunc($1,$3)}
+| other_types ARROW function_type {Tfunc($1,$3)}
 | other_types {$1}
 ;
 other_types:
