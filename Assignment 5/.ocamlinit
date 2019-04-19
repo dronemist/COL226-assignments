@@ -1,0 +1,53 @@
+#directory "_build";; (* Consider this folder when looking for files *)
+#load "a0.cmo";;
+#load "a5.cmo";;
+#load "a2.cmo";;
+#load "a3.cmo";;
+open A0;;
+open A5;;
+open A2;;
+open A3;;
+let exp_parser s = A3.exp_parser A2.read (Lexing.from_string s) ;;
+exception Not_implemented;;
+(* Input is given as string and output is a value *)
+let rec rho s = match s with
+  "X" -> Closure(Integer 5,rho)
+  |  "Y" -> Closure(Bool true,rho)
+  | _ -> raise Not_implemented
+;;
+let rec rho2 s = match s with
+  "X" -> Ansclos(Num (mk_big 5),rho2)
+  |  "Y" -> Ansclos(BoolVal true,rho2)
+  | _ -> raise Not_implemented
+;;
+let p1 =  App (Lambda ("X",Tint, Mult (Integer 3, V "X")), Integer 4);;
+let p2 = If_Then_Else
+   (Cmp (Integer 7),
+    App (Lambda ("X", Tint,Plus (Integer 3, V "X")), Integer 31), 
+    Integer 0);;
+let p3 = If_Then_Else
+    (Cmp (Integer 0),
+    App (Lambda ("X",Tint ,Plus (Integer 3, V "X")), Integer 4),
+        Integer 110);;
+
+let p4 = App(Lambda("N",Tint,If_Then_Else
+    (Cmp (V "N"),
+    App (Lambda ("X",Tint ,Plus (Integer 3, V "X")), Integer 4),
+        Integer 110)),Integer 5);;
+(*
+let p5 = App(RecLambda
+("Fib","N",Tint,(If_Then_Else(Cmp 
+(V "N"),Integer 3,Mult(Integer 3,App(V "Fib"
+,Plus(V "N",Integer 1)))))),Integer (-5));;
+
+let p6 = App(RecLambda("Fib","N",Tint,(If_Then_Else(Cmp (V "N"),Integer 3,Integer 5))),Integer 3);;
+*)
+let p5 = Let(
+  RecLambda("Fib",Lambda("N",Tint,If_Then_Else(Cmp(V "N"),Mult(V "N",App(V "Fib",Sub(V "N",Integer 1))),Integer 1))),
+  App(V "Fib",Integer 5)
+  );;
+
+let p6 = Let(
+  RecLambda("Fib",Lambda("N",Tint,If_Then_Else((V "N"),Mult(V "N",App(V "Fib",Sub(V "N",Integer 1))),Integer 1))),
+  App(V "Fib",Integer 5)
+  );;  
