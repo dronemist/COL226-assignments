@@ -59,7 +59,8 @@ type answerClosure = Ansclos of (answer * ((string * answerClosure) list));;
 type dumpType = Dump of (answerClosure list * ((string * answerClosure) list) * opcode list);;
 (* type of elements in the stack of krivine *)
 type stk_elements = ARG of closure | PLUS_stk of closure | MULT of closure | AND of closure | OR of closure | IFTE of (closure*closure) |CMP_stk | SUB of closure 
-| GT of closure | GTE of closure| LT of closure|LTE of closure|EQ of closure;;
+| GT of closure | GTE of closure| LT of closure|LTE of closure|EQ of closure|ABSOLUTE| NEGA | TUPLE of (closure * closure)
+| DIV of closure | REM of closure | PROJECT of int;;
 let int_of_Integer t = match t with
 | Integer(x) -> x
 | _ -> raise TypeMismatch;; 
@@ -90,11 +91,16 @@ let rec search x l = match l with
 let rec krivine foc stk = match foc with
   VClosure(e,gamma)->(  
       match e with
-      | Num(x) ->( match stk with 
+      | Num(x) ->( match stk with
+                    | [] -> foc 
                     | PLUS_stk(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (PLUS_stk(VClosure(Num(x),gamma))::tl))
                     | PLUS_stk(VClosure(Num(x1),g_dash))::tl -> krivine (VClosure(Num(add x x1),gamma)) tl
                     | SUB(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (SUB(VClosure(Num(x),gamma))::tl))
                     | SUB(VClosure(Num(x1),g_dash))::tl -> krivine (VClosure(Num(sub x1 x),gamma)) tl
+                    | DIV(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (DIV(VClosure(Num(x),gamma))::tl))
+                    | DIV(VClosure(Num(x1),g_dash))::tl -> krivine (VClosure(Num(div x1 x),gamma)) tl
+                    | REM(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (REM(VClosure(Num(x),gamma))::tl))
+                    | REM(VClosure(Num(x1),g_dash))::tl -> krivine (VClosure(Num(rem x1 x),gamma)) tl
                     | MULT(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (MULT(VClosure(Num(x),gamma))::tl))
                     | MULT(VClosure(Num(x1),g_dash))::tl -> krivine (VClosure(Num(mult x x1),gamma)) tl
                     | CMP_stk::tl -> (krivine (VClosure(BoolVal(gt x (mk_big 0)),gamma)) tl)
@@ -108,26 +114,45 @@ let rec krivine foc stk = match foc with
                     | LTE(VClosure(Num(x1),g_dash))::tl -> krivine (VClosure(BoolVal(leq x1 x),gamma)) tl
                     | EQ(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (EQ(VClosure(Num(x),gamma))::tl))
                     | EQ(VClosure(Num(x1),g_dash))::tl -> krivine (VClosure(BoolVal(eq x1 x),gamma)) tl
-                    | _ -> (foc)                                    
+                    | ABSOLUTE::tl -> krivine (VClosure(Num(abs x),gamma)) tl
+                    | NEGA::tl -> krivine (VClosure(Num(minus x),gamma)) tl
+                    | TUPLE(VClosure(Tup(n1,l1),g1),Closure(Tuple(n2,l2),g2))::tl -> if (n2) = 0 then krivine (VClosure(Tup((n1+1,l1@[e])),gamma)) tl
+                                                                                     else krivine (Closure((List.hd l2),gamma)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),gamma))::tl)   
+                    | _ -> raise BadStack                                    
       )
       | BoolVal(x) -> ( match stk with 
+                    [] -> foc
                     | AND(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (AND(VClosure(BoolVal(x),gamma))::tl))
                     | AND(VClosure(BoolVal(x1),g_dash))::tl -> krivine (VClosure(BoolVal(x && x1),gamma)) tl
                     | OR(Closure(a,g_dash))::tl -> (krivine (Closure(a,g_dash)) (OR(VClosure(BoolVal(x),gamma))::tl))
-                    | OR(VClosure(BoolVal(x1),g_dash))::tl -> krivine (VClosure(BoolVal(x && x1),gamma)) tl 
+                    | OR(VClosure(BoolVal(x1),g_dash))::tl -> krivine (VClosure(BoolVal(x || x1),gamma)) tl 
                     | IFTE(cl1,cl2)::tl -> if x then (krivine cl1 tl) 
-                                            else (krivine cl2 tl)                   
-                    | _ -> (foc)                                    
+                                            else (krivine cl2 tl) 
+                    | TUPLE(VClosure(Tup(n1,l1),g1),Closure(Tuple(n2,l2),g2))::tl -> if (n2) = 0 then krivine (VClosure(Tup((n1+1,l1@[e])),gamma)) tl
+                                                                                     else krivine (Closure((List.hd l2),gamma)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),gamma))::tl)                                          
+                    | _ -> raise BadStack                                    
       )
+      | Tup(n,x) -> (
+                    match stk with
+                    | [] -> foc 
+                    | TUPLE(VClosure(Tup(n1,l1),g1),Closure(Tuple(n2,l2),g2))::tl -> if (n2) = 0 then krivine (VClosure(Tup((n1+1,l1@[e])),gamma)) tl
+                                                                                     else krivine (Closure((List.hd l2),gamma)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),gamma))::tl)
+                    | PROJECT(i)::tl -> krivine (VClosure((List.nth x (i-1)),gamma)) tl
+                    | _ -> raise BadStack
+                    )
   )
   | Closure(e,gamma) -> (match e with
           | V(x) -> (print_string x;krivine (search x gamma) stk)
           | Integer(x) -> (krivine (VClosure(Num(mk_big x),gamma)) stk)
           | Bool(x) -> (krivine (VClosure(BoolVal(x),gamma)) stk)
+          | Abs(e1) -> krivine (Closure(e1,gamma)) (ABSOLUTE::stk)
+          | Negative(e1) -> krivine (Closure(e1,gamma)) (NEGA::stk)
           | Sub(e1,e2) -> (krivine (Closure(e1,gamma)) (SUB(Closure(e2,gamma))::stk) )
           | Cmp(e1) -> (krivine (Closure(e1,gamma)) (CMP_stk::stk))
           | Plus(e1,e2) -> (krivine (Closure(e1,gamma)) (PLUS_stk(Closure(e2,gamma))::stk) )
           | Mult(e1,e2) -> (krivine (Closure(e1,gamma)) (MULT(Closure(e2,gamma))::stk) )
+          | Div(e1,e2) -> (krivine (Closure(e1,gamma)) (DIV(Closure(e2,gamma))::stk) )
+          | Rem(e1,e2) -> (krivine (Closure(e1,gamma)) (REM(Closure(e2,gamma))::stk) )
           | And(e1,e2) -> (krivine (Closure(e1,gamma)) (AND(Closure(e2,gamma))::stk) )
           | Or(e1,e2) -> (krivine (Closure(e1,gamma)) (OR(Closure(e2,gamma))::stk) )
           | If_Then_Else(e1,e2,e3) -> (krivine (Closure(e1,gamma)) (IFTE(Closure(e2,gamma),(Closure(e3,gamma)))::stk) )
@@ -147,6 +172,8 @@ let rec krivine foc stk = match foc with
           | Equals(e1,e2) -> krivine (Closure(e1,gamma)) (EQ(Closure(e2,gamma))::stk)                                                                   
           | App(e1,e2) -> (krivine (Closure(e1,gamma)) ((ARG(Closure(e2,gamma)))::stk))
           | InParen(e1) -> krivine (Closure(e1,gamma)) stk
+          | Tuple(n,l1) -> krivine (Closure((List.hd l1),gamma)) (TUPLE(VClosure(Tup(0,[]),gamma),Closure(Tuple(n-1,List.tl l1),gamma))::stk) 
+          | Project((i,n),e) -> krivine (Closure(e,gamma)) (PROJECT(i)::stk)
   );;
 (* takes first n elements of list l1 in list l2 *)
 let rec firstN n l1 l2 = if n == 1 then (l2 @ [List.hd l1],List.tl l1)
@@ -172,7 +199,7 @@ dump: dump *)
 let rec secdmc stk env opc dump = match opc with
     | [] -> (match stk with
             | [] -> raise BadStack
-            | x::xs -> x
+            | Ansclos(a,gamma)::xs -> Ansclos(a,env)
     )
     | x::xs -> ( match x with
     | VAR(x) -> let y = (search x env) in (secdmc (y::stk) env xs dump)
@@ -296,7 +323,7 @@ let rec secdmc stk env opc dump = match opc with
                 secdmc zs ((x,Ansclos(Rectriple(q,x,c1),g_dash))::env) xs dump
               | _ -> raise BadStack
     ) *)
-    | LET -> secdmc stk (List.tl env) xs dump          
+    | LET ->secdmc stk (List.tl env) xs dump          
     | TUPLE(a) -> if a == 0 then
                     secdmc (Ansclos(Tup(0,[]),env)::stk) env xs dump
                   else 	
@@ -349,5 +376,3 @@ let rec compile t = match t with
 | Cmp(e1) -> (compile e1) @ [CMP] 
 | Not(t1) -> (compile t1) @ [NOT]
 | If_Then_Else(e1,e2,e3) -> (compile e1) @ [COND(compile e2,compile e3)]
-
-let ansSECD e1 = print_num(bigint_of_Num(getAns (secdmc [] [] (compile e1) [])));;
