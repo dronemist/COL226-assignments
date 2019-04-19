@@ -85,6 +85,9 @@ let rec search x l = match l with
             if x = a then b
             else (search x ys)  
 ;;
+let rec print_list l1 = match l1 with
+|[] -> "empty"
+|x::xs -> let (a,b)=x in (a ^ (print_list xs))
 (* Evaluation using krivine machine and call by name semantics 
   foc: focus closure
   stk: stack *)
