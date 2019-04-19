@@ -120,7 +120,7 @@ let rec krivine foc stk = match foc with
                     | ABSOLUTE::tl -> krivine (VClosure(Num(abs x),gamma)) tl
                     | NEGA::tl -> krivine (VClosure(Num(minus x),gamma)) tl
                     | TUPLE(VClosure(Tup(n1,l1),g1),Closure(Tuple(n2,l2),g2))::tl -> if (n2) = 0 then krivine (VClosure(Tup((n1+1,l1@[e])),gamma)) tl
-                                                                                     else krivine (Closure((List.hd l2),gamma)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),gamma))::tl)   
+                                                                                     else krivine (Closure((List.hd l2),g2)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),g2))::tl)   
                     | _ -> raise BadStack                                    
       )
       | BoolVal(x) -> ( match stk with 
@@ -132,7 +132,7 @@ let rec krivine foc stk = match foc with
                     | IFTE(cl1,cl2)::tl -> if x then (krivine cl1 tl) 
                                             else (krivine cl2 tl) 
                     | TUPLE(VClosure(Tup(n1,l1),g1),Closure(Tuple(n2,l2),g2))::tl -> if (n2) = 0 then krivine (VClosure(Tup((n1+1,l1@[e])),gamma)) tl
-                                                                                     else krivine (Closure((List.hd l2),gamma)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),gamma))::tl)                                          
+                                                                                     else krivine (Closure((List.hd l2),g2)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),g2))::tl)                                          
                     | NOT_stk::tl -> krivine (VClosure(BoolVal(not x),gamma)) tl
                     | _ -> raise BadStack                                    
       )
@@ -140,13 +140,13 @@ let rec krivine foc stk = match foc with
                     match stk with
                     | [] -> foc 
                     | TUPLE(VClosure(Tup(n1,l1),g1),Closure(Tuple(n2,l2),g2))::tl -> if (n2) = 0 then krivine (VClosure(Tup((n1+1,l1@[e])),gamma)) tl
-                                                                                     else krivine (Closure((List.hd l2),gamma)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),gamma))::tl)
+                                                                                     else krivine (Closure((List.hd l2),g2)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),g2))::tl)
                     | PROJECT(i)::tl -> krivine (VClosure((List.nth x (i-1)),gamma)) tl
                     | _ -> raise BadStack
                     )
   )
   | Closure(e,gamma) -> (match e with
-          | V(x) -> (print_string x;krivine (search x gamma) stk)
+          | V(x) -> (krivine (search x gamma) stk)
           | Integer(x) -> (krivine (VClosure(Num(mk_big x),gamma)) stk)
           | Bool(x) -> (krivine (VClosure(BoolVal(x),gamma)) stk)
           | Abs(e1) -> krivine (Closure(e1,gamma)) (ABSOLUTE::stk)
