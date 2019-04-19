@@ -116,4 +116,8 @@ and getType g e = match e with
                                               else raise Type_mismatch   
                             | _ -> raise Type_mismatch
   )
-  | RecLambda(x,name,t,e1) -> Tfunc(t,(getType (augment g [(x,t)]) e1));; 
+  | RecLambda(x,name,t,e1) -> let Tfunc(t1,t2) = t in (
+                              if (getType (augment (augment g [x,t1]) [name,t]) e1) = t2 then t
+                              else raise Type_mismatch  
+  )
+  | Cmp(e1)-> if (getType g e) = Tint then Tbool else raise Type_mismatch;; 

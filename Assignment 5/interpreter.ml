@@ -13,9 +13,9 @@ let ansFromClosure cl = match cl with
 let ansFromAnswerclosure cl = match cl with
 | Ansclos(a,gamma) -> a;;
 (* Type checker *)
-let typeCheker e = try(let t1 = (getType [] e) in true)
+let typeChecker e = try(let t1 = (getType [] e) in true)
                    with Type_mismatch -> false     
-let cbn s = let e = (exp_parser s) in ( if true then (ansFromClosure (krivine (Closure(e,[])) []))
+let cbn s = let e = (exp_parser s) in ( if (typeChecker e) then (ansFromClosure (krivine (Closure(e,[])) []))
             else raise Type_mismatch)                                            
-let cbv s = let e = (exp_parser s) in ( if true then (ansFromAnswerclosure (secdmc [] [] (compile e) []))
+let cbv s = let e = (exp_parser s) in ( if (typeChecker e) then (ansFromAnswerclosure (secdmc [] [] (compile e) []))
             else raise Type_mismatch)    
