@@ -57,7 +57,7 @@ type dumpType = Dump of (answerClosure list * ((string * answerClosure) list) * 
 (* type of elements in the stack of krivine *)
 type stk_elements = ARG of closure | PLUS_stk of closure | MULT of closure | AND of closure | OR of closure | IFTE of (closure*closure) |CMP_stk | SUB of closure 
 | GT of closure | GTE of closure| LT of closure|LTE of closure|EQ of closure|ABSOLUTE| NEGA | TUPLE of (closure * closure)
-| DIV of closure | REM of closure | PROJECT of int;;
+| DIV of closure | REM of closure | PROJECT of int | NOT_stk;;
 val krivine: closure -> (stk_elements list) -> (closure)
 val secdmc: (answerClosure list) -> ((string * answerClosure) list) -> (opcode list) -> (dumpType list) -> answerClosure
 val compile: exptree -> (opcode list)

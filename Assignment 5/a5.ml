@@ -60,7 +60,7 @@ type dumpType = Dump of (answerClosure list * ((string * answerClosure) list) * 
 (* type of elements in the stack of krivine *)
 type stk_elements = ARG of closure | PLUS_stk of closure | MULT of closure | AND of closure | OR of closure | IFTE of (closure*closure) |CMP_stk | SUB of closure 
 | GT of closure | GTE of closure| LT of closure|LTE of closure|EQ of closure|ABSOLUTE| NEGA | TUPLE of (closure * closure)
-| DIV of closure | REM of closure | PROJECT of int;;
+| DIV of closure | REM of closure | PROJECT of int | NOT_stk;;
 let int_of_Integer t = match t with
 | Integer(x) -> x
 | _ -> raise TypeMismatch;; 
@@ -130,6 +130,7 @@ let rec krivine foc stk = match foc with
                                             else (krivine cl2 tl) 
                     | TUPLE(VClosure(Tup(n1,l1),g1),Closure(Tuple(n2,l2),g2))::tl -> if (n2) = 0 then krivine (VClosure(Tup((n1+1,l1@[e])),gamma)) tl
                                                                                      else krivine (Closure((List.hd l2),gamma)) (TUPLE(VClosure(Tup(n1+1,l1@[e]),gamma),Closure(Tuple(n2-1,(List.tl l2)),gamma))::tl)                                          
+                    | NOT_stk::tl -> krivine (VClosure(BoolVal(not x),gamma)) tl
                     | _ -> raise BadStack                                    
       )
       | Tup(n,x) -> (
@@ -174,6 +175,7 @@ let rec krivine foc stk = match foc with
           | InParen(e1) -> krivine (Closure(e1,gamma)) stk
           | Tuple(n,l1) -> krivine (Closure((List.hd l1),gamma)) (TUPLE(VClosure(Tup(0,[]),gamma),Closure(Tuple(n-1,List.tl l1),gamma))::stk) 
           | Project((i,n),e) -> krivine (Closure(e,gamma)) (PROJECT(i)::stk)
+          | Not(e1) -> krivine (Closure(e1,gamma)) (NOT_stk::stk)
   );;
 (* takes first n elements of list l1 in list l2 *)
 let rec firstN n l1 l2 = if n == 1 then (l2 @ [List.hd l1],List.tl l1)
