@@ -14,7 +14,7 @@
 %token <bool> BOOL
 %token <string> ID
 %token ABS TILDA NOT PLUS MINUS TIMES DIV REM CONJ DISJ EQ GT LT LP RP IF THEN ELSE FI COMMA PROJ
-LET IN END BACKSLASH DOT DEF SEMICOLON COLON ARROW TINT TUNIT TBOOL REC PARALLEL LOCAL EOF
+LET IN END BACKSLASH DOT DEF SEMICOLON COLON ARROW TINT TUNIT TBOOL REC PARALLEL LOCAL EOF CMP
 %start def_parser exp_parser type_parser
 %type <A5.definition> def_parser /* Returns definitions */
 %type <A5.exptree> exp_parser /* Returns expression */
@@ -49,6 +49,7 @@ comparison:
     | comparison LT sub_expression {LessT($1,$3)}
     | comparison GT EQ sub_expression {GreaterTE($1,$4)}
     | comparison LT EQ sub_expression {LessTE($1,$4)}
+    | CMP sub_expression {Cmp($2)}
     | sub_expression              {$1}
 ;
 

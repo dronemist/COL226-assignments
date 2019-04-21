@@ -120,4 +120,4 @@ and getType g e = match e with
                               if (getType (augment (augment g [x,t1]) [name,t]) e1) = t2 then t
                               else raise Type_mismatch  
   )
-  | Cmp(e1)-> if (getType g e) = Tint then Tbool else raise Type_mismatch;; 
+  | Cmp(e1)-> if (getType g e1) = Tint then Tbool else raise Type_mismatch;; 

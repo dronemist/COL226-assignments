@@ -30,6 +30,7 @@ rule read = parse
 | "rec" {(REC)}
 | '(' {(LP)}
 | ')' {(RP)}
+| "cmp" {(CMP)}
 | 'T' {(BOOL(true))}
 | 'F' {(BOOL(false))}	
 |"not" {(NOT)}

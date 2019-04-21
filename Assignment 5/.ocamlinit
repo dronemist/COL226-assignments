@@ -12,7 +12,16 @@ open A3;;
 open A4;;
 open Interpreter;;
 let exp_parser s = A3.exp_parser A2.read (Lexing.from_string s);;
-let s = "rec Gcd N:(Tint*Tint) = (if proj(2,2)N = 0 then proj(1,2)N else Gcd((proj(2,2)N,proj(1,2)N mod proj(2,2)N)) fi)((20,10))"
-let rec print_list l1 = match l1 with
-|[] -> ""
-|x::xs -> let (a,b) = x in (a ^ (print_list xs));;
+(* Test cases *)
+(* Basic Test cases *)
+let s1 = "\\X:Tint.(X*3)(4)";;
+let s2 = "if cmp 7 then \\X:Tint.(3+X)(31) else 0 fi";;
+let s3 = "if cmp 0 then \\X:Tint.(3+X)(4) else 110 fi";;
+(* Type checking test cases *)
+let t1 = "T+F";;
+let t2 = "rec Gcd N:(Tint*Tint)->Tint = (if proj(2,2)N = 0 then (2,3) else Gcd((proj(2,2)N,proj(1,2)N mod proj(2,2)N)) fi)((20,10))";;
+let t3 = "proj(2,3)1";;
+(* Recursive test cases *)
+let gcd  = "rec Gcd N:(Tint*Tint)->Tint = (if proj(2,2)N = 0 then proj(1,2)N else Gcd((proj(2,2)N,proj(1,2)N mod proj(2,2)N)) fi)((20,10))";;
+let fib = "rec Fib N:Tint->Tint = (if N<2 then 1 else Fib(N-1)+Fib(N-2) fi)(10)";;
+let fact = "rec Fact N:Tint->Tint = (if N=1 then 1 else N*Fact(N-1) fi)(10)";;
