@@ -6,7 +6,7 @@ all:
 	ocamlc -c lexer.ml
 	ocamlc -c parser.ml
 	ocamlc -c interpreter.ml
-	ocamlc -o calculate a6.cmo lexer.cmo parser.cmo interpreter.cmo
+	ocamlc -o simluator a6.cmo lexer.cmo parser.cmo interpreter.cmo
 
 clean:
-	rm calculate *.cmo *.cmi *.mli lexer.ml parser.ml
+	rm calculate *.cmo *.cmi parser.mli lexer.mli interpreter.mli lexer.ml parser.ml
