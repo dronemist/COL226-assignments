@@ -1,0 +1,10 @@
+#directory "_build";; (* Consider this folder when looking for files *)
+#load "a6.cmo";; (* Load the a0 bytecode *)
+#load "lexer.cmo";;
+#load "parser.cmo";;
+#load "interpreter.cmo";;
+open A6;;
+open Lexer;;
+open Parser;;
+open Interpreter;;
+let act_parser s = Parser.act_parser Lexer.read (Lexing.from_string s);;

@@ -1,0 +1,1 @@
+ocamlbuild a6.cmo lexer.cmo parser.cmo interpreter.cmo
