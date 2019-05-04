@@ -1,0 +1,73 @@
+Test Inputs
+==> #0;
+#1 = Stack
+#2 = Procedures that can be called
+#3 = Variables that can accessed
+#4 = Static link chain
+==> #1;
+main 
+==> P(2,3);
+
+==> #3;
+z = 0
+a = 0
+x = 2
+y = 3
+b = 0
+c = 0
+
+==> Q(x,4);
+
+==> #2;
+P, T, U and Q 
+==> U(x,2);
+
+==> RET;
+
+==> #3;
+x = 0
+b = 0
+z = 2
+w = 4
+a = 0
+c = 0
+
+==> #1;
+Q P main 
+==> #4;
+Q main 
+==> x:=7;
+Update occurs in procedure Q
+==> T(2,5);
+
+==> R(6,7);
+Procedure can't be called 
+==> #1;
+T Q P main 
+==> #4;
+T Q main 
+==> V(2,3,4);
+Procedure can't be called 
+==> W(2,3,4);
+Incorrect arguments provided 
+==> a:=True;
+LHS and RHS are not of same type  
+==> W(True,4);
+Incorrect arguments provided 
+==> #3;
+i = 0
+f = 0
+a = 2
+y = 5
+x = 7
+b = 0
+z = 2
+w = 4
+c = 0
+
+==> #4;
+T Q main 
+==> #1;
+T Q P main 
+==> i:=4;
+Update occurs in procedure T
