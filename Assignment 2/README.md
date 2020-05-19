@@ -4,6 +4,41 @@ Make sure utop is installed, keep a2.mll .ocamlinit and compile.sh in the same f
 ```
 bash compile.sh
 ```
+## Expressions
+The expressions include:
+- Integer constants with an optional sign
+- Binary arithmetic operators:
+  - **\+** (Addition)
+  - **\-** (Subtraction)
+  - **\*** (Multiplication)
+  - **div** (Division)
+  - **^** (Exponentiation)
+- Unary arithmetic operators:
+  - **abs** (Absolute value)
+- Parenthesis:
+  - **(**
+  - **)**
+- Boolean constants:
+  - **T** (True)
+  - **F** (False)
+- Unary boolean operation:
+  - **not**
+- Binary boolean operations:  
+  - **\/\\**  (and)
+  - **\\/**  (or)
+- Comparison operators:
+  - **=**  (equal)
+  - **>**  (greater than)
+  - **<**  (less than)
+  - **>=**  (greater or equal)
+  - **<=**  (less or equal)
+- A conditional operator consisting of three tokens:
+  - **if then else**
+- _Identifiers_ which are alphanumeric strings beginning with lower-case letter.
+- A definition construct:
+  - **def**
+- _A delimiter_ to terminate the expression:
+  - **;**
 ## Lexer
 The lexer was implemented in order to identify the following tokens:
 ```ocaml
